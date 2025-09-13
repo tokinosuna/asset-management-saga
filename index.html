@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Management Saga - You can redo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
+  <svg xmlns="http://www.w3.org/2000/svg">
+  <text y="32" font-size="32">💸</text>
+</svg>
+    <style>
+        :root {
+            /* Default Light Theme (Glassmorphism) */
+            --bg-light: #F5EFE6;
+            --card-bg-light: #E8DFCA50;
+            --text-light: #333;
+            --primary-accent-light: #6D94C5;
+            --secondary-accent-light: #CBDCEB;
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+
+            /* Dark Theme */
+            --bg-dark: #2C2F33;
+            --card-bg-dark: #36393F50;
+            --text-dark: #E8DFCA;
+            --primary-accent-dark: #8AB2E0;
+            --secondary-accent-dark: #5C6E8F;
+            --shadow-dark: rgba(0, 0, 0, 0.4);
+            --border-dark: rgba(255, 255, 255, 0.1);
+            
+            /* New Y2K Pixel Theme */
+            --font-pixel: 'Press Start 2P', cursive;
+            --bg-y2k: #F5BABB; 
+            --card-bg-y2k: #FFF5F2; 
+            --text-y2k: #000000;
+            --primary-accent-y2k: #6d5c8d;
+            --secondary-accent-y2k: #FFFFFF;
+            --shadow-y2k: #000000;
+            --border-y2k-light: #FFFFFF;
+            --border-y2k-dark: #808080;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg-light);
+            color: var(--text-light);
+            transition: background-color 0.3s, color 0.3s;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        /* Y2K Theme Styles */
+        body.y2k-mode {
+            font-family: var(--font-pixel);
+            font-size: 15px;
+            background-color: var(--bg-y2k);
+            color: var(--text-y2k);
+            image-rendering: pixelated;
+        }
+        /* Scanline effect for Y2K theme */
+        body.y2k-mode::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(0,0,0,0.15) 50%, transparent 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1001;
+            opacity: 0.8;
+        }
+
+        .game-container {
+            width: 95%;
+            max-width: 450px;
+            height: 95vh;
+            max-height: 800px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .status-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 10px;
+            border-radius: 15px;
+            background-color: var(--card-bg-light);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 15px var(--shadow-light);
+            margin-bottom: 20px;
+        }
+
+        .dark-mode .status-bar {
+            background-color: var(--card-bg-dark);
+            border: 1px solid var(--border-dark);
+            box-shadow: 0 4px 15px var(--shadow-dark);
+        }
+        
+        .y2k-mode .status-bar {
+            background-color: var(--card-bg-y2k);
+            border: 2px solid;
+            border-color: var(--border-y2k-light) var(--border-y2k-dark) var(--border-y2k-dark) var(--border-y2k-light);
+            box-shadow: none;
+            border-radius: 0;
+            backdrop-filter: none;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--primary-accent-light);
+        }
+
+        .dark-mode .status-item {
+            color: var(--primary-accent-dark);
+        }
+        
+        .y2k-mode .status-item {
+            color: var(--text-y2k);
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+
+        .status-item span {
+            margin-left: 8px;
+        }
+
+        .card-container {
+            flex-grow: 1;
+            width: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .card {
+            position: absolute;
+            width: 95%;
+            max-width: 400px;
+            height: 90%;
+            max-height: 550px;
+            background-color: var(--card-bg-light);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-light);
+            border-radius: 25px;
+            box-shadow: 0 8px 30px var(--shadow-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            padding: 25px;
+            box-sizing: border-box;
+            text-align: center;
+            cursor: grab;
+            user-select: none;
+            touch-action: pan-y;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            will-change: transform, opacity;
+        }
+
+        .dark-mode .card {
+            background-color: var(--card-bg-dark);
+            border: 1px solid var(--border-dark);
+            box-shadow: 0 8px 30px var(--shadow-dark);
+        }
+
+        .y2k-mode .card {
+            background-color: var(--card-bg-y2k);
+            border: 2px solid;
+            border-color: var(--border-y2k-light) var(--border-y2k-dark) var(--border-y2k-dark) var(--border-y2k-light);
+            border-radius: 0;
+            box-shadow: 5px 5px 0px var(--shadow-y2k);
+            backdrop-filter: none;
+        }
+
+        .card.dragging {
+            cursor: grabbing;
+        }
+        
+        .y2k-mode .card.dragging {
+            box-shadow: 8px 8px 0px var(--shadow-y2k);
+        }
+
+        .card h2 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: var(--primary-accent-light);
+        }
+
+        .dark-mode .card h2 {
+            color: var(--primary-accent-dark);
+        }
+        
+        .y2k-mode .card h2 {
+            color: var(--primary-accent-y2k);
+            background-color: var(--primary-accent-y2k);
+            color: var(--secondary-accent-y2k);
+            padding: 5px 10px;
+            font-size: 1.2em;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .card-image {
+            font-size: 4em;
+            margin: 15px 0;
+            flex-shrink: 0;
+        }
+        
+        .y2k-mode .card-image {
+            font-size: 3.5em;
+        }
+
+        .card p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            flex-grow: 1;
+            margin-bottom: 20px;
+        }
+        
+        .y2k-mode .card p {
+            font-size: 0.9em;
+            line-height: 1.8;
+        }
+        
+        .swipe-indicators {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            box-sizing: border-box;
+            font-weight: bold;
+            font-size: 1.2em;
+            gap:20px;
+        }
+        
+        .y2k-mode .swipe-indicators {
+            font-size: 0.7em;
+            font-weight: normal;
+        }
+
+        .swipe-indicator-left,
+        .swipe-indicator-right {
+         padding: 10px 15px;
+        border-radius: 10px;width: 20vw;
+height: 20vw;
+max-width: 200px;
+max-height: 100px;
+min-width: 50px;
+min-height: 50px;
+background-color: var(--secondary-accent-light);
+color: var(--text-light);
+opacity: 0.8;
+transition: opacity 0.3s;
+display: flex;
+align-items: center;
+        }
+
+        .dark-mode .swipe-indicator-left,
+        .dark-mode .swipe-indicator-right {
+            background-color: var(--secondary-accent-dark);
+            color: var(--text-dark);
+        }
+        
+        .y2k-mode .swipe-indicator-left,
+        .y2k-mode .swipe-indicator-right {
+            background-color: var(--card-bg-y2k);
+            color: var(--text-y2k);
+            border: 2px solid;
+            border-color: var(--border-y2k-light) var(--border-y2k-dark) var(--border-y2k-dark) var(--border-y2k-light);
+            border-radius: 0;
+        }
+
+        .swipe-indicator-left span,
+        .swipe-indicator-right span {
+            margin: 0 5px;
+        }
+
+        .ending-screen {
+            position: absolute;
+            width: 95%;
+            max-width: 400px;
+            height: 90%;
+            max-height: 550px;
+            background-color: var(--card-bg-light);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-light);
+            border-radius: 25px;
+            box-shadow: 0 8px 30px var(--shadow-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+            box-sizing: border-box;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .dark-mode .ending-screen {
+            background-color: var(--card-bg-dark);
+            border: 1px solid var(--border-dark);
+            box-shadow: 0 8px 30px var(--shadow-dark);
+        }
+        
+        .y2k-mode .ending-screen {
+            background-color: var(--card-bg-y2k);
+            border: 2px solid;
+            border-color: var(--border-y2k-light) var(--border-y2k-dark) var(--border-y2k-dark) var(--border-y2k-light);
+            border-radius: 0;
+            box-shadow: 5px 5px 0px var(--shadow-y2k);
+            backdrop-filter: none;
+        }
+
+        .ending-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .ending-screen h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: var(--primary-accent-light);
+        }
+        .dark-mode .ending-screen h2 {
+            color: var(--primary-accent-dark);
+        }
+        .y2k-mode .ending-screen h2 {
+            color: var(--primary-accent-y2k);
+            font-size: 1.5em;
+        }
+
+        .ending-screen p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .y2k-mode .ending-screen p {
+            font-size: 0.9em;
+            line-height: 1.8;
+        }
+
+        .restart-button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            background-color: var(--primary-accent-light);
+            color: var(--bg-light);
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        .dark-mode .restart-button {
+            background-color: var(--primary-accent-dark);
+            color: var(--bg-dark);
+        }
+
+        .restart-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .y2k-mode .restart-button {
+            font-family: var(--font-pixel);
+            font-size: 0.9em;
+            background-color: var(--card-bg-y2k);
+            color: var(--text-y2k);
+            border: 2px solid;
+            border-color: var(--border-y2k-light) var(--border-y2k-dark) var(--border-y2k-dark) var(--border-y2k-light);
+            border-radius: 0;
+            box-shadow: 3px 3px 0px var(--shadow-y2k);
+            font-weight: normal;
+        }
+        .y2k-mode .restart-button:hover {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0px var(--shadow-y2k);
+        }
+        .y2k-mode .restart-button:active {
+            transform: translate(3px, 3px);
+            box-shadow: none;
+            border-color: var(--border-y2k-dark) var(--border-y2k-light) var(--border-y2k-light) var(--border-y2k-dark);
+        }
+
+
+        .settings-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary-accent-light);
+            color: var(--bg-light);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px var(--shadow-light);
+            z-index: 1000;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        .dark-mode .settings-button {
+            background-color: var(--primary-accent-dark);
+            color: var(--bg-dark);
+            box-shadow: 0 2px 10px var(--shadow-dark);
+        }
+        .y2k-mode .settings-button {
+            background-color: var(--card-bg-y2k);
+            color: var(--text-y2k);
+            border: 2px solid;
+            border-color: var(--border-y2k-light) var(--border-y2k-dark) var(--border-y2k-dark) var(--border-y2k-light);
+            border-radius: 0;
+            box-shadow: 3px 3px 0px var(--shadow-y2k);
+        }
+
+        .settings-button:hover {
+            transform: scale(1.05);
+        }
+        .y2k-mode .settings-button:hover {
+             transform: scale(1);
+        }
+
+        .settings-panel {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 280px;
+            background-color: var(--card-bg-light);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px var(--shadow-light);
+            padding: 20px;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+
+        .dark-mode .settings-panel {
+            background-color: var(--card-bg-dark);
+            border: 1px solid var(--border-dark);
+            box-shadow: 0 4px 20px var(--shadow-dark);
+        }
+
+        .y2k-mode .settings-panel {
+            background-color: var(--card-bg-y2k);
+            border: 2px solid;
+            border-color: var(--border-y2k-light) var(--border-y2k-dark) var(--border-y2k-dark) var(--border-y2k-light);
+            border-radius: 0;
+            box-shadow: 5px 5px 0px var(--shadow-y2k);
+            backdrop-filter: none;
+            font-size: 0.8em;
+        }
+
+        .settings-panel.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateY(0);
+        }
+
+        .settings-panel h3 {
+            margin-top: 0;
+            color: var(--primary-accent-light);
+        }
+        .dark-mode .settings-panel h3 {
+            color: var(--primary-accent-dark);
+        }
+        .y2k-mode .settings-panel h3 {
+            color: var(--primary-accent-y2k);
+            margin-bottom: 20px;
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .setting-item span {
+            margin-bottom: 10px;
+        }
+
+        #theme-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .y2k-mode #theme-selector label {
+            cursor: pointer;
+        }
+        .y2k-mode #theme-selector input[type="radio"] {
+             /* Add custom retro styling for radio buttons */
+            -webkit-appearance: none;
+            appearance: none;
+            background-color: #fff;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.15em;
+            height: 1.15em;
+            border: 2px solid var(--border-y2k-dark);
+            transform: translateY(-0.075em);
+            display: inline-grid;
+            place-content: center;
+        }
+        .y2k-mode #theme-selector input[type="radio"]::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em var(--primary-accent-y2k);
+        }
+        .y2k-mode #theme-selector input[type="radio"]:checked::before {
+            transform: scale(1);
+        }
+
+        .hackathon-info {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-light);
+            font-size: 0.9em;
+            color: var(--text-light);
+            opacity: 0.8;
+            text-align: center;
+        }
+        .dark-mode .hackathon-info {
+            border-top: 1px solid var(--border-dark);
+            color: var(--text-dark);
+        }
+        .y2k-mode .hackathon-info {
+            border-top: 2px solid var(--border-y2k-dark);
+            color: var(--text-y2k);
+            font-size: 0.7em;
+            line-height: 1.5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 10px;
+            }
+            .status-bar {
+                padding: 10px;
+            }
+            .status-item {
+                font-size: 1em;
+            }
+             .y2k-mode .status-item {
+                font-size: 0.7em;
+            }
+            .card h2 {
+                font-size: 1.5em;
+            }
+            .y2k-mode .card h2 {
+                font-size: 1em;
+            }
+            .card p {
+                font-size: 1em;
+            }
+            .y2k-mode .card p {
+                font-size: 0.8em;
+            }
+            .card-image {
+                font-size: 3em;
+            }
+            .settings-panel {
+                width: 90%;
+                left: 5%;
+                right: 5%;
+                bottom: 80px;
+            }
+            .settings-button {
+                bottom: 15px;
+                right: 15px;
+            }
+            .swipe-indicators {
+                font-size: 1em;
+              gap:5px;
+            }
+             .y2k-mode .swipe-indicators {
+                font-size: 0.6em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="status-bar">
+            <div class="status-item">💰<span id="money-status">0</span></div>
+            <div class="status-item">😊<span id="happiness-status">0</span></div>
+            <div class="status-item">📉<span id="debt-status">0</span></div>
+            <div class="status-item">🧠<span id="skill-status">0</span></div>
+        </div>
+
+        <div class="card-container">
+            <!-- Cards are generated here by JavaScript -->
+        </div>
+
+        <div class="swipe-indicators">
+            <div class="swipe-indicator-left">⬅️ No / Left Option Text</div>
+            <div class="swipe-indicator-right">Yes / Right Option Text ➡️</div>
+        </div>
+
+        <div id="ending-screen" class="ending-screen">
+            <h2 id="ending-title"></h2>
+            <p id="ending-text"></p>
+            <button class="restart-button">Start Over!</button>
+        </div>
+
+        <button class="settings-button" id="settings-toggle-btn">⚙️</button>
+
+        <div class="settings-panel" id="settings-panel">
+            <h3>Settings</h3>
+            <div class="setting-item">
+                <span>Theme</span>
+                <div id="theme-selector">
+                    <label><input type="radio" name="theme" value="default" checked> Default</label>
+                    <label><input type="radio" name="theme" value="dark"> Dark</label>
+                    <label><input type="radio" name="theme" value="y2k"> Y2K</label>
+                </div>
+            </div>
+            <div class="hackathon-info">
+                This prototype is made for the "Hack the System" Hackathon.
+                <br>
+                Challenge: Democratize Public Finance.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameData = {
+            money: 500,
+            happiness: 50,
+            debt: 0,
+            skill: 10
+        };
+
+        const storyCards = [
+            {
+                id: 'intro',
+                title: "Welcome, Rookie!",
+                text: "You just landed your first official income, be it from a summer job, a mysterious inheritance from a long-lost pet, or successfully selling your obscure fan-fiction online. You have 💰500. What's your first move, brave adventurer in the land of adulting?",
+                image: "💸",
+                leftOptionText: "Blow it all on instant gratification! 🥳",
+                leftEffect: { money: -500, happiness: 30, skill: -5, nextCardId: 'partyHard' },
+                rightOptionText: "Carefully consider future me. 🤔",
+                rightEffect: { money: 0, happiness: -10, skill: 5, nextCardId: 'budgetTime' }
+            },
+            {
+                id: 'partyHard',
+                title: "The Ultimate Spree!",
+                text: "You went all out! Limited edition 'Unicorn Tears' flavored instant noodles, a life-sized cardboard cutout of your favorite anime character, and a dubious 'investment seminar' ticket. You feel amazing! For now. But your wallet's lighter than a feather.",
+                image: "🎉",
+                leftOptionText: "Regret nothing! More fun! 💃",
+                leftEffect: { money: -50, happiness: 10, debt: 20, nextCardId: 'lateNightSnack' },
+                rightOptionText: "Maybe I should... check my bank balance? 😬",
+                rightEffect: { money: 0, happiness: -20, skill: 10, nextCardId: 'emptyWallet' }
+            },
+            {
+                id: 'budgetTime',
+                title: "Budgeting Basics",
+                text: "You decided to create a spreadsheet. A glorious, colorful spreadsheet! You've allocated funds for 'Essentials,' 'Savings,' and a tiny bit for 'Future Self's Emergency Ramen Fund.' You feel responsible, but also a tiny bit bored.",
+                image: "📊",
+                leftOptionText: "Get a boring book on investing. 📚",
+                leftEffect: { money: -20, happiness: -5, skill: 15, nextCardId: 'investmentBook' },
+                rightOptionText: "Treat myself to a small reward. I earned it! 🍩",
+                rightEffect: { money: -10, happiness: 15, skill: 0, nextCardId: 'smallReward' }
+            },
+            {
+                id: 'lateNightSnack',
+                title: "Midnight Munchies",
+                text: "It's 2 AM. Your stomach growls like a grumpy dragon. You remember that 'Unicorn Tears' ramen. It's calling your name. Your 'Emergency Ramen Fund' is, well, empty. Do you use your emergency credit card, or forage for stale crackers?",
+                image: "🍜",
+                leftOptionText: "Credit card, YOLO! 💳",
+                leftEffect: { money: -30, debt: 50, happiness: 5, nextCardId: 'debtCollector' },
+                rightOptionText: "Stale crackers it is. 🥐",
+                rightEffect: { money: 0, happiness: -15, skill: 5, nextCardId: 'crackerWisdom' }
+            },
+            {
+                id: 'emptyWallet',
+                title: "The Reality Check",
+                text: "Your bank app stares back at you with a chilling 'Insufficient Funds' message. Panic! How did this happen so fast? You realize those unicorn noodles were a mistake. A delicious, sparkly, regrettable mistake.",
+                image: "💸",
+                leftOptionText: "Ask for a loan from a questionable friend. 😈",
+                leftEffect: { money: 100, debt: 150, happiness: -10, nextCardId: 'questionableLoan' },
+                rightOptionText: "Try to earn some quick cash. 💻",
+                rightEffect: { money: 0, happiness: -5, skill: 10, nextCardId: 'quickGig' }
+            },
+            {
+                id: 'investmentBook',
+                title: "Reading the Fine Print",
+                text: "You dove headfirst into a book titled 'The Zen of Compounding Interest.' Your brain feels like it's trying to parallel park a monster truck. But you're learning! Your friends call you 'boring,' but your future self might thank you.",
+                image: "📈",
+                leftOptionText: "Apply newfound knowledge! Small investment! 📊",
+                leftEffect: { money: -50, skill: 20, happiness: 5, nextCardId: 'firstInvestment' },
+                rightOptionText: "Share tips with friends, for free. 🗣️",
+                rightEffect: { money: 0, happiness: 10, skill: 5, nextCardId: 'financialGuru' }
+            },
+            {
+                id: 'smallReward',
+                title: "A Little Treat",
+                text: "That fancy coffee with extra whipped cream tasted like victory! You're recharged. It's a small expense, but it reminds you that life isn't just about spreadsheets and delayed gratification. Balance, young grasshopper!",
+                image: "☕",
+                leftOptionText: "Now, back to hardcore saving! 💪",
+                leftEffect: { money: 0, happiness: 5, skill: 5, nextCardId: 'seriousSaving' },
+                rightOptionText: "Maybe another small treat? Just one more... 🍦",
+                rightEffect: { money: -10, happiness: 10, skill: 0, nextCardId: 'treatTooMany' }
+            },
+            {
+                id: 'debtCollector',
+                title: "The Ghost of Debts Past",
+                text: "A message pops up: 'Urgent reminder from your credit provider. Your balance is due, with interest.' The ramen was delicious, but the consequences? Not so much. Your debt status has gone up!",
+                image: "🚨",
+                leftOptionText: "Ignore it. It'll probably go away. 🙈",
+                leftEffect: { debt: 100, happiness: -20, nextCardId: 'totalAnarchy' },
+                rightOptionText: "Sacrifice a fun activity to pay it back. 💸",
+                rightEffect: { money: -50, debt: -50, happiness: -10, nextCardId: 'painfulPayment' }
+            },
+            {
+                id: 'crackerWisdom',
+                title: "The Cracker Enlightenment",
+                text: "Eating stale crackers in the dark, you ponder the true meaning of financial freedom. The ramen, the anime cutout... Was it all worth it? A tiny spark of wisdom ignites within your soul. Never again will you trust a unicorn-flavored noodle.",
+                image: "💡",
+                leftOptionText: "Swear off impulse buys forever. 🙅",
+                leftEffect: { skill: 15, happiness: 0, nextCardId: 'seriousSaving' },
+                rightOptionText: "Maybe just... a little impulse buy next time? 👀",
+                rightEffect: { skill: 0, happiness: 5, nextCardId: 'treatTooMany' }
+            },
+            {
+                id: 'questionableLoan',
+                title: "The Unspoken Agreement",
+                text: "Your friend 'Shadow' lent you cash. 'No rush, just pay me back... eventually,' he said with a wink. You now have money, but also a creeping sense of unease. Shadow's 'favors' always come with a price.",
+                image: "🤝",
+                leftOptionText: "Spend it wisely, pay Shadow back ASAP. 🤝",
+                leftEffect: { money: -100, debt: -100, happiness: 10, nextCardId: 'painfulPayment' },
+                rightOptionText: "A little more fun, then worry about Shadow. 🎉",
+                rightEffect: { money: -50, debt: 50, happiness: 15, nextCardId: 'totalAnarchy' }
+            },
+            {
+                id: 'quickGig',
+                title: "Side Hustle Hustle",
+                text: "You used your skills to design a quirky website for a local 'Alien Souvenir Shop.' It was a grind, but you earned some cash! Your skill stat went up, and you dodged a bullet (of financial ruin).",
+                image: "💻",
+                leftOptionText: "Save this newfound cash! 💰",
+                leftEffect: { money: 100, skill: 5, nextCardId: 'seriousSaving' },
+                rightOptionText: "Celebrate with a small reward. 🥳",
+                rightEffect: { money: 50, happiness: 10, nextCardId: 'smallReward' }
+            },
+            {
+                id: 'firstInvestment',
+                title: "Tiny Acorn, Mighty Oak?",
+                text: "You invested a small sum in a 'futuristic-robot-cat-farming-startup.' It's risky, but the book said 'diversify'! You feel sophisticated, like a tiny squirrel playing the stock market.",
+                image: "💹",
+                leftOptionText: "Obsessively check stock prices every 5 minutes. 😵‍💫",
+                leftEffect: { happiness: -10, skill: 5, nextCardId: 'seriousSaving' },
+                rightOptionText: "Forget about it, let it grow (or not). 🧘",
+                rightEffect: { happiness: 10, skill: 0, nextCardId: 'financialGuru' }
+            },
+            {
+                id: 'financialGuru',
+                title: "The Unofficial Advisor",
+                text: "Your friends are now asking you for financial advice. You're dispensing wisdom like a seasoned sage, even if most of it comes from that boring book. It feels good to help, and you're reinforcing your own knowledge.",
+                image: "🧑‍🏫",
+                leftOptionText: "Charge them for your wisdom. 💲",
+                leftEffect: { money: 20, happiness: 5, skill: 10, nextCardId: 'seriousSaving' },
+                rightOptionText: "Keep it free, spread the knowledge. 🤝",
+                rightEffect: { happiness: 15, skill: 5, nextCardId: 'firstInvestment' }
+            },
+            {
+                id: 'seriousSaving',
+                title: "The Ascetic Saver",
+                text: "You've become a saving machine! Every penny is scrutinized. You're eating instant noodles (non-unicorn flavored), avoiding all social outings, and your bank balance is growing. You're financially secure, but also... a little lonely?",
+                image: "🏦",
+                leftOptionText: "Stick to the plan, more saving! 🔒",
+                leftEffect: { money: 100, happiness: -20, skill: 10, nextCardId: 'endRichLonely' },
+                rightOptionText: "Find a balanced way to enjoy life. ⚖️",
+                rightEffect: { money: 50, happiness: 15, skill: 0, nextCardId: 'endBalanced' }
+            },
+            {
+                id: 'treatTooMany',
+                title: "The Treat Avalanche",
+                text: "Oops. One treat led to another. That fancy coffee, then a limited edition comic, then a subscription box for 'Mysterious Socks.' Your bank account is looking sad again. Your happiness is fleeting, like a sugar rush.",
+                image: "🛒",
+                leftOptionText: "Panic! Overspend to feel better! 😱",
+                leftEffect: { money: -50, debt: 50, happiness: -10, nextCardId: 'totalAnarchy' },
+                rightOptionText: "Cut losses, reassess budget. ✂️",
+                rightEffect: { money: 0, happiness: -15, skill: 10, nextCardId: 'emptyWallet' }
+            },
+            {
+                id: 'painfulPayment',
+                title: "Debt Repaid, Soul Intact",
+                text: "You paid back your debt. It stung, like a paper cut on your wallet, but the relief is immense. No more ominous messages or awkward encounters with Shadow. You learned a valuable lesson about borrowing.",
+                image: "✅",
+                leftOptionText: "Double down on saving to prevent this again! 🔒",
+                leftEffect: { money: 0, skill: 10, happiness: -5, nextCardId: 'seriousSaving' },
+                rightOptionText: "Celebrate this small victory with a treat! 🥳",
+                rightEffect: { money: -10, happiness: 15, skill: 0, nextCardId: 'smallReward' }
+            },
+            {
+                id: 'totalAnarchy',
+                title: "Chaos Reigns Supreme!",
+                text: "You've spiraled! Debt collectors are calling, your happiness is at rock bottom, and your skills are, well, not helping. Your bank account is a black hole. You just wanted to have fun, but life had other plans.",
+                image: "💥",
+                leftOptionText: "Try to run away from your problems. 🏃",
+                leftEffect: { money: -100, debt: 200, happiness: -30, nextCardId: 'endBrokeChaotic' },
+                rightOptionText: "Confront the chaos, one step at a time. 🤯",
+                rightEffect: { money: 0, debt: -50, happiness: -10, skill: 20, nextCardId: 'emptyWallet' }
+            }
+        ];
+
+        const endings = {
+            endRichLonely: {
+                title: "The Scrooge's Secret Stash",
+                text: "You amassed a fortune! Your bank account could buy a small country, but you're perpetually alone, counting your coins. Was it worth it? Probably. You're rich! But maybe try talking to people sometimes. (Money: High, Happiness: Low, Skill: High)"
+            },
+            endBalanced: {
+                title: "The Everyday Hero",
+                text: "You found balance! You saved, you splurged a little, you learned. Your finances are stable, your happiness is consistent, and you're ready for whatever life throws at you. You might not be rich, but you're definitely thriving! (Money: Medium, Happiness: Medium, Skill: Medium)"
+            },
+            endBrokeChaotic: {
+                title: "The Bankrupt Buffoon",
+                text: "Oh dear. Your financial life is a dumpster fire. Debt collectors are practically your new best friends, and your happiness is a distant memory. You had fun... for about five minutes. Time to restart, perhaps with a financial advisor this time? (Money: Low, Happiness: Very Low, Skill: Low)"
+            }
+        };
+
+        const cardContainer = document.querySelector('.card-container');
+        const endingScreen = document.getElementById('ending-screen');
+        const endingTitle = document.getElementById('ending-title');
+        const endingText = document.getElementById('ending-text');
+        const restartButton = document.querySelector('.restart-button');
+        const settingsToggleBtn = document.getElementById('settings-toggle-btn');
+        const settingsPanel = document.getElementById('settings-panel');
+        const themeSelector = document.getElementById('theme-selector');
+        const swipeIndicatorLeft = document.querySelector('.swipe-indicator-left');
+        const swipeIndicatorRight = document.querySelector('.swipe-indicator-right');
+
+        let activeCard = null;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        let gameActive = true;
+        let currentCardData = null;
+
+        function updateStatusBar() {
+            document.getElementById('money-status').textContent = gameData.money;
+            document.getElementById('happiness-status').textContent = gameData.happiness;
+            document.getElementById('debt-status').textContent = gameData.debt;
+            document.getElementById('skill-status').textContent = gameData.skill;
+
+            gameData.money = Math.max(-500, gameData.money);
+            gameData.happiness = Math.max(0, Math.min(100, gameData.happiness));
+            gameData.debt = Math.max(0, gameData.debt);
+            gameData.skill = Math.max(0, Math.min(100, gameData.skill));
+        }
+
+        function createCardElement(cardData) {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.setAttribute('data-card-id', cardData.id);
+
+            card.innerHTML = `
+                <h2>${cardData.title}</h2>
+                <div class="card-image">${cardData.image}</div>
+                <p>${cardData.text}</p>
+            `;
+            return card;
+        }
+
+        function renderCard(cardData) {
+            if (!cardData) {
+                endGame();
+                return;
+            }
+            currentCardData = cardData;
+            const newCard = createCardElement(cardData);
+            cardContainer.appendChild(newCard);
+            activeCard = newCard;
+            attachSwipeListeners(activeCard);
+            updateSwipeIndicators(cardData);
+        }
+
+        function updateSwipeIndicators(cardData) {
+            swipeIndicatorLeft.innerHTML = `⬅️ ${cardData.leftOptionText}`;
+            swipeIndicatorRight.innerHTML = `${cardData.rightOptionText} ➡️`;
+        }
+
+        function attachSwipeListeners(card) {
+            card.addEventListener('mousedown', startDrag);
+            card.addEventListener('touchstart', startDrag);
+        }
+
+        function startDrag(e) {
+            if (!gameActive) return;
+            isDragging = true;
+            activeCard.classList.add('dragging');
+            startX = e.clientX || e.touches[0].clientX;
+            activeCard.style.transition = 'none';
+
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('touchend', endDrag);
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            currentX = e.clientX || e.touches[0].clientX;
+            const diffX = currentX - startX;
+            const rotation = diffX / 20;
+            activeCard.style.transform = `translateX(${diffX}px) rotate(${rotation}deg)`;
+        }
+
+        function endDrag(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            activeCard.classList.remove('dragging');
+            activeCard.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+
+            const diffX = (e.clientX || (e.changedTouches && e.changedTouches[0].clientX)) - startX;
+            const threshold = cardContainer.offsetWidth / 4;
+
+            if (Math.abs(diffX) > threshold) {
+                const choice = diffX < 0 ? 'left' : 'right';
+                processChoice(choice);
+            } else {
+                activeCard.style.transform = 'translateX(0) rotate(0deg)';
+            }
+
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('touchend', endDrag);
+        }
+
+        function processChoice(choice) {
+            if (!activeCard || !currentCardData) return;
+
+            let effect;
+            let nextCardId;
+
+            if (choice === 'left') {
+                activeCard.style.transform = 'translateX(-150%) rotate(-15deg)';
+                effect = currentCardData.leftEffect;
+            } else {
+                activeCard.style.transform = 'translateX(150%) rotate(15deg)';
+                effect = currentCardData.rightEffect;
+            }
+            activeCard.style.opacity = '0';
+
+            setTimeout(() => {
+                if (activeCard.parentNode) {
+                    activeCard.parentNode.removeChild(activeCard);
+                }
+                applyEffects(effect);
+                nextCardId = effect.nextCardId;
+                const nextCardData = storyCards.find(card => card.id === nextCardId);
+                renderCard(nextCardData);
+            }, 300);
+        }
+
+        function applyEffects(effect) {
+            for (const key in effect) {
+                if (gameData.hasOwnProperty(key)) {
+                    gameData[key] += effect[key];
+                }
+            }
+            updateStatusBar();
+            checkGameEndConditions();
+        }
+
+        function checkGameEndConditions() {
+            if (gameData.money <= -400 || gameData.debt >= 300) {
+                endGame('endBrokeChaotic');
+            } else if (gameData.money >= 1000 && gameData.happiness <= 20) {
+                endGame('endRichLonely');
+            } else if (currentCardData && currentCardData.id === 'seriousSaving' && gameData.happiness < 40) {
+                 endGame('endRichLonely');
+            } else if (currentCardData && currentCardData.id === 'totalAnarchy' && gameData.happiness < 10) {
+                 endGame('endBrokeChaotic');
+            } else if (gameData.money >= 500 && gameData.happiness >= 50 && gameData.skill >= 40) {
+                if (Math.random() < 0.2) {
+                    endGame('endBalanced');
+                }
+            }
+
+            const isEndingCard = currentCardData && (currentCardData.leftEffect.nextCardId in endings || currentCardData.rightEffect.nextCardId in endings);
+            
+            if (isEndingCard) return; // Let the ending card trigger the end
+
+            const nextCardIdFromCurrent = currentCardData ? (currentCardData.rightEffect?.nextCardId || currentCardData.leftEffect?.nextCardId) : null;
+            if (!nextCardIdFromCurrent && !endingScreen.classList.contains('active')) {
+                let finalEnding = 'endBalanced';
+                if (gameData.money > 800 && gameData.happiness < 40) {
+                    finalEnding = 'endRichLonely';
+                } else if (gameData.money < 100 && gameData.debt > 100) {
+                    finalEnding = 'endBrokeChaotic';
+                }
+                endGame(finalEnding);
+            }
+        }
+
+        function endGame(endingType) {
+            if (!gameActive) return; // Prevent multiple endings
+            gameActive = false;
+            let finalEnding = endings[endingType];
+
+            if (!finalEnding) {
+                if (gameData.money >= 800 && gameData.happiness < 40) {
+                    finalEnding = endings.endRichLonely;
+                } else if (gameData.money < 100 || gameData.debt >= 100) {
+                    finalEnding = endings.endBrokeChaotic;
+                } else {
+                    finalEnding = endings.endBalanced;
+                }
+            }
+
+            endingTitle.textContent = finalEnding.title;
+            endingText.textContent = finalEnding.text;
+            endingScreen.classList.add('active');
+        }
+
+        function restartGame() {
+            gameData.money = 500;
+            gameData.happiness = 50;
+            gameData.debt = 0;
+            gameData.skill = 10;
+            gameActive = true;
+            updateStatusBar();
+            cardContainer.innerHTML = '';
+            endingScreen.classList.remove('active');
+            renderCard(storyCards.find(card => card.id === 'intro'));
+        }
+
+        function applyTheme(theme) {
+            document.body.classList.remove('dark-mode', 'y2k-mode');
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else if (theme === 'y2k') {
+                document.body.classList.add('y2k-mode');
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'default';
+            applyTheme(savedTheme);
+            const radioButtons = document.querySelectorAll('input[name="theme"]');
+            radioButtons.forEach(radio => {
+                if (radio.value === savedTheme) {
+                    radio.checked = true;
+                }
+            });
+        }
+
+        themeSelector.addEventListener('change', (e) => {
+            applyTheme(e.target.value);
+        });
+
+        settingsToggleBtn.addEventListener('click', () => {
+            settingsPanel.classList.toggle('active');
+        });
+
+        restartButton.addEventListener('click', restartGame);
+        
+        // Close settings panel if clicked outside
+        document.addEventListener('click', function(event) {
+            const isClickInsidePanel = settingsPanel.contains(event.target);
+            const isClickOnButton = settingsToggleBtn.contains(event.target);
+
+            if (!isClickInsidePanel && !isClickOnButton && settingsPanel.classList.contains('active')) {
+                settingsPanel.classList.remove('active');
+            }
+        });
+
+        initializeTheme();
+        updateStatusBar();
+        renderCard(storyCards.find(card => card.id === 'intro'));
+    </script>
+</body>
+</html>
