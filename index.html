@@ -84,6 +84,8 @@
             opacity: 0.8;
         }
 
+        ::-webkit-scrollbar{width:10px}::-webkit-scrollbar-track{background:var(--secondary-accent-light)}::-webkit-scrollbar-thumb{background:var(--primary-accent-light);border-radius:10px}::-webkit-scrollbar-thumb:hover{background:#557a95}*{scrollbar-width:thin;scrollbar-color:var(--primary-accent-light) var(--secondary-accent-light)}.dark-mode::-webkit-scrollbar-track{background:var(--secondary-accent-dark)}.dark-mode::-webkit-scrollbar-thumb{background:var(--primary-accent-dark)}.dark-mode::-webkit-scrollbar-thumb:hover{background:#739bcd}.dark-mode{scrollbar-color:var(--primary-accent-dark) var(--secondary-accent-dark)}.y2k-mode{scrollbar-width:auto;scrollbar-color:var(--primary-accent-y2k) var(--card-bg-y2k)}.y2k-mode::-webkit-scrollbar{width:12px}.y2k-mode::-webkit-scrollbar-track{background:var(--card-bg-y2k)}.y2k-mode::-webkit-scrollbar-thumb{background:var(--primary-accent-y2k);border-radius:0;border:2px solid;border-color:var(--border-y2k-light) var(--border-y2k-dark) var(--border-y2k-dark) var(--border-y2k-light)}.y2k-mode::-webkit-scrollbar-thumb:hover{background:var(--primary-accent-y2k)}
+
         .game-container {
             width: 95%;
             max-width: 450px;
@@ -165,7 +167,7 @@
             width: 95%;
             max-width: 400px;
             height: 90%;
-            max-height: 550px;
+            max-height: 75%;
             background-color: var(--card-bg-light);
             backdrop-filter: blur(15px);
             border: 1px solid var(--border-light);
@@ -230,8 +232,7 @@
         }
 
         .card-image {
-            font-size: 4em;
-            margin: 15px 0;
+            font-size: 2em;
             flex-shrink: 0;
         }
         
@@ -253,6 +254,7 @@
         }
         
         .swipe-indicators {
+            height:10%;
             width: 100%;
             display: flex;
             justify-content: space-between;
