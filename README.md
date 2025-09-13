@@ -1,6 +1,6 @@
-# Life's Quirky Choices: The Asset Management Saga
+# Asset Management Saga - You can redo
 
-## Project Description: Navigating the Financial Wild West with Humor and Heart
+## Project Description: Swipe Your Way to Financial Wisdom with a Game That Gets Real About Your Wallet.
 
 Ever felt like adulting comes with a secret rulebook that nobody bothered to give you? Especially when it comes to money? Yeah, me too. "Life's Quirky Choices" isn't just another boring finance app; it's an **interactive story game** designed to make personal finance less intimidating and genuinely *fun* for young adults (think 15-25 year olds) embarking on their first financial journeys.
 
