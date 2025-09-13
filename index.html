@@ -93,7 +93,7 @@
             max-height: 800px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            gap: 10px; 
             align-items: center;
             padding: 20px;
             box-sizing: border-box;
@@ -185,6 +185,7 @@
             touch-action: pan-y;
             transition: transform 0.3s ease-out, opacity 0.3s ease-out;
             will-change: transform, opacity;
+            overflow-y: auto;
         }
 
         .dark-mode .card {
@@ -281,10 +282,11 @@
     transition: opacity 0.3s;
     display: flex;
     align-items: center;
-    justify-content: center; 
+    justify-content: center;
     flex: 1; 
     text-align: center; 
     min-height: 100px; 
+         word-break: break-word;
         }
 
         .dark-mode .swipe-indicator-left,
